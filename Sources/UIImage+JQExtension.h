@@ -48,12 +48,7 @@
  *  返回一张自由设置尺寸的图片
  */
 + (instancetype)resizedImage:(UIImage*)image toSize:(CGSize)size;
-    
-    /**
-     *  返回一张自由设置尺寸的图片
-     */
-- (UIImage *)imageForSize:(CGSize)size;
-    
+
     /**
      *  返回一张圆角的图片
      */
