@@ -92,7 +92,6 @@ static char TITLELABELKEY;
         self.tipsImgView.contentMode = UIViewContentModeCenter;
         self.tipsImgView.center = CGPointMake(self.emptyView.center.x, rect.size.height/2);
         
-        DLog(@"center = %@",NSStringFromCGPoint(self.tipsImgView.center));
         [self.emptyView addSubview:self.tipsImgView];
         
         if (title) {

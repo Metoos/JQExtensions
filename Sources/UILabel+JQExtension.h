@@ -26,7 +26,7 @@
 /**
  *  改变行间距和字间距
  *  @param lineSpace 行间距值
- *  @param lineSpace 字间距值
+ *  @param wordSpace 字间距值
  */
 - (void)changeSpaceWithLineSpace:(CGFloat)lineSpace WordSpace:(CGFloat)wordSpace;
 
