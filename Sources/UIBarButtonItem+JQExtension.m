@@ -8,7 +8,6 @@
 
 #import "UIBarButtonItem+JQExtension.h"
 #import <objc/runtime.h>
-#import "UIButton+WebCache.h"
 #import "UIImage+JQExtension.h"
 static char CLICK_BLOCK_BACK;
 @implementation UIBarButtonItem (JQExtension)
@@ -32,16 +31,36 @@ static char CLICK_BLOCK_BACK;
 {
     self = [self init];
 
-    
     UIButton *barButton = [UIButton buttonWithType:UIButtonTypeCustom];
     barButton.frame = CGRectMake(0, 0, 30, 30);
-    [barButton sd_setImageWithURL:[NSURL URLWithString:imageUrl] forState:UIControlStateNormal placeholderImage:image completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, NSURL *imageURL) {
-         //使用图片原图
-         UIImage *rightImage = [image imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal];
-        //切圆角
-         rightImage = [rightImage circleImage];
-         [barButton setImage:rightImage forState:UIControlStateNormal];
-    }];
+    
+    dispatch_async(dispatch_get_global_queue(0,0), ^{
+        
+        NSData *imageData = [NSData dataWithContentsOfURL:[NSURL URLWithString:imageUrl]];
+        UIImage *image = [UIImage imageWithData:imageData];
+        //使用图片原图
+        UIImage *rightImage = [image imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal];
+        CGFloat originalWidth = image.size.width;
+        CGFloat originalHeight = image.size.height;
+        CGSize size = CGSizeMake(30.0f, 30.0f*originalHeight/originalWidth);  //固定宽 高按图片宽高比自动缩放
+        
+        rightImage = [UIImage resizedImage:rightImage toSize:size];
+        //        //切圆角
+        //        rightImage  = [rightImage circleImage];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [barButton setImage:rightImage forState:UIControlStateNormal];
+        });
+    });
+    //使用SDWebImage来加载图片
+    //    [barButton sd_setImageWithURL:[NSURL URLWithString:imageUrl] forState:UIControlStateNormal placeholderImage:image completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, NSURL *imageURL) {
+    //         //使用图片原图
+    //         UIImage *rightImage = [image imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal];
+    //
+    //        //切圆角
+    //         rightImage = [UIImage resizedImage:rightImage toSize:CGSizeMake(30, 30)];
+    //        rightImage  = [rightImage circleImage];
+    //         [barButton setImage:rightImage forState:UIControlStateNormal];
+    //    }];
     [barButton addTarget:self action:@selector(barBtnAction:) forControlEvents:UIControlEventTouchUpInside];
     self.customView = barButton;
     self.ClickBlock = click;
