@@ -16,7 +16,7 @@ Pod::Spec.new do |s|
   #
 
   s.name         = "JQExtentions"
-  s.version      = "0.0.2"
+  s.version      = "0.0.1"
   s.summary      = "OC some of the base class extentions."
 
   # This description is used to generate tags and improve search results.
@@ -117,7 +117,7 @@ Pod::Spec.new do |s|
   #
 
   # s.framework  = "SomeFramework"
-  s.frameworks = "Foundation", "UIKit", "ImageIO", "QuartzCore"
+  s.frameworks = "Foundation", "UIKit"
 
   # s.library   = "iconv"
   # s.libraries = "iconv", "xml2"
@@ -132,6 +132,6 @@ Pod::Spec.new do |s|
   s.requires_arc = true
 
   # s.xcconfig = { "HEADER_SEARCH_PATHS" => "$(SDKROOT)/usr/include/libxml2" }
-  s.dependency 'SDWebImage'
+  # s.dependency 'SDWebImage', '~> 4.3.0'
 
 end
