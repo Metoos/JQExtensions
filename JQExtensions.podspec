@@ -15,7 +15,7 @@ Pod::Spec.new do |s|
   #  summary should be tweet-length, and the description more in depth.
   #
 
-  s.name         = "JQExtentions"
+  s.name         = "JQExtensions"
   s.version      = "0.0.1"
   s.summary      = "OC some of the base class extentions."
 
