@@ -32,6 +32,7 @@
  @param value 需要设置的比例
  */
 + (void)setFontScale:(CGFloat)value{
+    
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     [defaults setObject:@(value) forKey:JQFontScaleKey];
     [defaults synchronize];
@@ -46,7 +47,7 @@
 + (CGFloat)getFontScale{
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     NSNumber *valueNum = [defaults objectForKey:JQFontScaleKey];
-    return valueNum?valueNum.floatValue:0;
+    return valueNum?valueNum.floatValue:1.0;
 }
 
 @end

@@ -47,10 +47,12 @@ static char K_IndefiniteAnimatedView;
     self.contentVerticalAlignment = UIControlContentVerticalAlignmentCenter;
     NSDictionary *attrs = @{NSFontAttributeName : self.titleLabel.font};
     CGSize titleSize = [self.titleLabel.text boundingRectWithSize:CGSizeMake(MAXFLOAT, self.titleLabel.frame.size.height) options:NSStringDrawingUsesLineFragmentOrigin | NSStringDrawingUsesFontLeading attributes:attrs context:nil].size;
+    
     //图片距离右边框距离减少图片的宽度，其它不边
-    [self setImageEdgeInsets:UIEdgeInsetsMake(-((titleSize.height+space+self.imageView.frame.size.height)/2), 0.0, 0.0, -titleSize.width)];
+    [self setImageEdgeInsets:UIEdgeInsetsMake(-((self.imageView.frame.size.height)/3+space/2), 0.0, 0.0, -titleSize.width)];
     //文字距离上边框的距离增加imageView的高度，距离左边框减少imageView的宽度，距离下边框和右边框距离不变
-    [self setTitleEdgeInsets:UIEdgeInsetsMake(self.imageView.frame.size.height+self.imageView.frame.origin.y+space, -self.imageView.frame.size.width, 0.0, 0.0)];
+    [self setTitleEdgeInsets:UIEdgeInsetsMake((self.imageView.frame.size.height-self.imageView.frame.origin.y+space), -self.imageView.frame.size.width, 0.0, 0.0)];
+    
 }
 
 /** 设置按钮为 右图片左文字的显示方式 图文间隙默认为 10*/

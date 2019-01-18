@@ -3,4 +3,4 @@
 
 cocoaPods安装：
 
-pod 'JQExtensions', '~> 0.0.3'
+pod 'JQExtensions', '~> 1.0'

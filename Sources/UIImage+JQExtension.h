@@ -7,6 +7,12 @@
 //
 
 #import <UIKit/UIKit.h>
+typedef NS_ENUM(NSUInteger, GradientType) {
+    GradientTypeTopToBottom = 0,//从上到小
+    GradientTypeLeftToRight = 1,//从左到右
+    GradientTypeUpleftToLowright = 2,//左上到右下
+    GradientTypeUprightToLowleft = 3,//右上到左下
+};
 
 @interface UIImage (JQExtension)
 
@@ -39,9 +45,15 @@
      *  将UIColor变换为UIImage
      */
 + (instancetype)jq_imageWithColor:(UIColor *)color width:(CGFloat)width height:(CGFloat)height;
-    /**
-     *  返回一张自由拉伸的图片
-     */
+
+/**
+ *  渐变颜色生成图片
+ */
++ (UIImage *)gradientColorImageFromColors:(NSArray*)colors gradientType:(GradientType)gradientType imgSize:(CGSize)imgSize;
+
+/**
+ *  返回一张自由拉伸的图片
+ */
 + (instancetype)resizedImageWithName:(NSString *)name;
 + (instancetype)resizedImageWithName:(NSString *)name left:(CGFloat)left top:(CGFloat)top;
 /**
@@ -91,5 +103,80 @@
  */
 + (UIImage *)resizableImageWithCapInsets:(UIEdgeInsets)edgeInsets imageNamed:(NSString*)imageNamed;
 
+
+
+/** 根据视频url获取第一帧图片*/
++ (UIImage *)videoPreViewImage:(NSURL *)path;
+
+/** base64字符串转图片 */
++ (UIImage *)base64StrToUIImage:(NSString *)encodedImageStr;
+
+/** 图片转base64字符串 */
++ (NSString *)imageToBase64Str:(UIImage *)image;
+
+/**
+ *  生成毛玻璃效果的图片
+ *
+ *  @param image      要模糊化的图片
+ *  @param blurAmount 模糊化指数
+ *
+ *  @return 返回模糊化之后的图片
+ */
++ (UIImage *)blurredImageWithImage:(UIImage *)image andBlurAmount:(CGFloat)blurAmount;
+
+/**
+ *  图形模糊算法
+ *
+ *  @param image     要模糊的图片
+ *  @param blurLevel 模糊的级别
+ *
+ *  @return 模糊好的图片
+ */
+- (UIImage *)blearImageWithBlurLevel:(CGFloat)blurLevel;
+/**
+ 对比两张图片是否相同
+ 
+ @param image 原图
+ @param anotherImage 需要比较的图片
+ 
+ */
++ (BOOL)imageEqualToImage:(UIImage*)image anotherImage:(UIImage *)anotherImage;
+
+/**
+ 图片透明度
+ @param alpha 透明度
+ @param image 原图
+ 
+ */
++ (UIImage *)imageByApplyingAlpha:(CGFloat)alpha  image:(UIImage*)image;
+
+/**
+ 镶嵌图片
+ 
+ @param firstImage 图片1
+ @param secondImage 图片2
+ @return 拼接后的图片
+ */
++ (UIImage *)spliceFirstImage:(UIImage *)firstImage secondImage:(UIImage *)secondImage;
+
+/**
+ 生成二维码图片
+ 
+ @param dataDic 二维码中的信息
+ @param size 二维码Size
+ @param waterImage 水印图片
+ @return 一个二维码图片，水印在二维码中央
+ */
++ (UIImage *)qrCodeImageForDataString:(NSString *)dataStr size:(CGSize)size waterImage:(UIImage *)waterImage;
+
+/**
+ 修改二维码颜色
+ @param image 二维码图片
+ @param red red
+ @param green green
+ @param blue blue
+ @return 修改颜色后的二维码图片
+ */
++ (UIImage *)changeColorWithQRCodeImage:(UIImage *)image red:(NSUInteger)red green:(NSUInteger)green blue:(NSUInteger)blue;
 
 @end

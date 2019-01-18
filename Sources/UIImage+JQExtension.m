@@ -10,6 +10,7 @@
 #import <ImageIO/ImageIO.h>
 #import <Accelerate/Accelerate.h>
 #import <float.h>
+#import <AVFoundation/AVFoundation.h>
 @implementation UIImage (JQExtension)
 
 
@@ -240,6 +241,49 @@
     return theImage;
 }
 
+/**
+ *  渐变颜色生成图片
+ */
++ (UIImage *)gradientColorImageFromColors:(NSArray*)colors gradientType:(GradientType)gradientType imgSize:(CGSize)imgSize {
+    NSMutableArray *ar = [NSMutableArray array];
+    for(UIColor *c in colors) {
+        [ar addObject:(id)c.CGColor];
+    }
+    UIGraphicsBeginImageContextWithOptions(imgSize, YES, 1);
+    CGContextRef context = UIGraphicsGetCurrentContext();
+    CGContextSaveGState(context);
+    CGColorSpaceRef colorSpace = CGColorGetColorSpace([[colors lastObject] CGColor]);
+    CGGradientRef gradient = CGGradientCreateWithColors(colorSpace, (CFArrayRef)ar, NULL);
+    CGPoint start;
+    CGPoint end;
+    switch (gradientType) {
+        case GradientTypeTopToBottom:
+            start = CGPointMake(0.0, 0.0);
+            end = CGPointMake(0.0, imgSize.height);
+            break;
+        case GradientTypeLeftToRight:
+            start = CGPointMake(0.0, 0.0);
+            end = CGPointMake(imgSize.width, 0.0);
+            break;
+        case GradientTypeUpleftToLowright:
+            start = CGPointMake(0.0, 0.0);
+            end = CGPointMake(imgSize.width, imgSize.height);
+            break;
+        case GradientTypeUprightToLowleft:
+            start = CGPointMake(imgSize.width, 0.0);
+            end = CGPointMake(0.0, imgSize.height);
+            break;
+        default:
+            break;
+    }
+    CGContextDrawLinearGradient(context, gradient, start, end, kCGGradientDrawsBeforeStartLocation | kCGGradientDrawsAfterEndLocation);
+    UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
+    CGGradientRelease(gradient);
+    CGContextRestoreGState(context);
+    CGColorSpaceRelease(colorSpace);
+    UIGraphicsEndImageContext();
+    return image;
+}
 
 /**
  *  按比例来压缩,固定宽度，高度自动缩放
@@ -643,6 +687,387 @@
     return newImage;
 }
 
+/** 根据视频url获取第一帧图片*/
++ (UIImage *)videoPreViewImage:(NSURL *)path {
+    
+    AVURLAsset *asset = [[AVURLAsset alloc] initWithURL:path options:nil];
+    AVAssetImageGenerator *assetGen = [[AVAssetImageGenerator alloc] initWithAsset:asset];
+    
+    assetGen.appliesPreferredTrackTransform = YES;
+    CMTime time = CMTimeMakeWithSeconds(0.0, 600);
+    NSError *error = nil;
+    CMTime actualTime;
+    CGImageRef image = [assetGen copyCGImageAtTime:time actualTime:&actualTime error:&error];
+    UIImage *videoImage = [[UIImage alloc] initWithCGImage:image];
+    CGImageRelease(image);
+    return videoImage;
+}
+
+//字符串转图片
++ (UIImage *)base64StrToUIImage:(NSString *)encodedImageStr {
+    
+    NSData *decodedImageData = [[NSData alloc]initWithBase64EncodedString:encodedImageStr options:(NSDataBase64DecodingIgnoreUnknownCharacters)];
+    UIImage *decodedImage = [UIImage imageWithData:decodedImageData];
+    
+    return decodedImage;
+}
+
+//图片转字符串
++ (NSString *)imageToBase64Str:(UIImage *)image {
+    
+    NSData *data = UIImageJPEGRepresentation(image, 1.0f);
+    NSString *encodedImageStr = [data base64EncodedStringWithOptions:NSDataBase64Encoding64CharacterLineLength];
+    return encodedImageStr;
+}
+
+/**
+ *  生成毛玻璃效果的图片
+ *
+ *  @param image      要模糊化的图片
+ *  @param blurAmount 模糊化指数
+ *
+ *  @return 返回模糊化之后的图片
+ */
++ (UIImage *)blurredImageWithImage:(UIImage *)image andBlurAmount:(CGFloat)blurAmount
+{
+    return [image blurredImage:blurAmount];
+}
+
+/**
+ *  返回毛玻璃效果的图片
+ *
+ *  @param blurAmount 模糊化指数
+ */
+- (UIImage*)blurredImage:(CGFloat)blurAmount
+{
+    if (blurAmount < 0.0 || blurAmount > 2.0) {
+        blurAmount = 0.5;
+    }
+    CGImageRef img = self.CGImage;
+    
+    vImage_Buffer inBuffer, outBuffer;
+    vImage_Error error;
+    
+    void *pixelBuffer;
+    
+    CGDataProviderRef inProvider = CGImageGetDataProvider(img);
+    CFDataRef inBitmapData = CGDataProviderCopyData(inProvider);
+    
+    inBuffer.width = CGImageGetWidth(img);
+    inBuffer.height = CGImageGetHeight(img);
+    inBuffer.rowBytes = CGImageGetBytesPerRow(img);
+    
+    inBuffer.data = (void *)CFDataGetBytePtr(inBitmapData);
+    
+    pixelBuffer = malloc(CGImageGetBytesPerRow(img) * CGImageGetHeight(img));
+    
+    outBuffer.data = pixelBuffer;
+    outBuffer.width = CGImageGetWidth(img);
+    outBuffer.height = CGImageGetHeight(img);
+    outBuffer.rowBytes = CGImageGetBytesPerRow(img);
+    int boxSize = blurAmount * 40;
+    boxSize = boxSize - (boxSize % 2) + 1;
+    error = vImageBoxConvolve_ARGB8888(&inBuffer, &outBuffer, NULL, 0, 0, boxSize, boxSize, NULL, kvImageEdgeExtend);
+    if (!error)
+    {
+        error = vImageBoxConvolve_ARGB8888(&outBuffer, &inBuffer, NULL, 0, 0, boxSize, boxSize, NULL, kvImageEdgeExtend);
+    }
+    
+    CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
+    
+    CGContextRef ctx = CGBitmapContextCreate(outBuffer.data,
+                                             outBuffer.width,
+                                             outBuffer.height,
+                                             8,
+                                             outBuffer.rowBytes,
+                                             colorSpace,
+                                             (CGBitmapInfo)kCGImageAlphaNoneSkipLast);
+    
+    CGImageRef imageRef = CGBitmapContextCreateImage (ctx);
+    
+    UIImage *returnImage = [UIImage imageWithCGImage:imageRef];
+    
+    CGContextRelease(ctx);
+    CGColorSpaceRelease(colorSpace);
+    
+    free(pixelBuffer);
+    CFRelease(inBitmapData);
+    CGImageRelease(imageRef);
+    
+    return returnImage;
+}
+
+/**
+ *  图形模糊算法
+ *
+ *  @param image     要模糊的图片
+ *  @param blurLevel 模糊的级别
+ *
+ *  @return 模糊好的图片
+ */
+- (UIImage *)blearImageWithBlurLevel:(CGFloat)blurLevel
+{
+    CIContext *context = [CIContext contextWithOptions:nil];
+    CIImage *inputImage = [[CIImage alloc] initWithImage:self];
+    CIFilter *blurFilter = [CIFilter filterWithName:@"CIGaussianBlur"];
+    [blurFilter setDefaults];
+    [blurFilter setValue:inputImage forKey:@"inputImage"];
+    //设值模糊的级别
+    [blurFilter setValue:[NSNumber numberWithFloat:blurLevel] forKey:@"inputRadius"];
+    CIImage *outputImage = [blurFilter valueForKey:@"outputImage"];
+    CGRect rect = inputImage.extent;    // Create Rect
+    //设值一下 减到图片的白边
+    rect.origin.x += blurLevel;
+    rect.origin.y += blurLevel;
+    rect.size.height -= blurLevel * 2.0f;
+    rect.size.width -= blurLevel * 2.0f;
+    CGImageRef cgImage = [context createCGImage:outputImage fromRect:rect];
+    //获取新的图片
+    UIImage *newImage = [UIImage imageWithCGImage:cgImage scale:0.5 orientation:self.imageOrientation];
+    //释放图片
+    CGImageRelease(cgImage);
+    
+    return newImage;
+}
+
+/**
+ 对比两张图片是否相同
+ 
+ @param image 原图
+ @param anotherImage 需要比较的图片
+ 
+ */
++ (BOOL)imageEqualToImage:(UIImage *)image anotherImage:(UIImage *)anotherImage {
+    
+    NSData *orginalData = UIImagePNGRepresentation(image);
+    NSData *anotherData = UIImagePNGRepresentation(anotherImage);
+    if ([orginalData isEqual:anotherData]) {
+        return YES;
+    }
+    return NO;
+}
+
+/**
+ 图片透明度
+ @param alpha 透明度
+ @param image 原图
+ */
++ (UIImage *)imageByApplyingAlpha:(CGFloat)alpha  image:(UIImage*)image {
+    
+    UIGraphicsBeginImageContextWithOptions(image.size, NO, 0.0f);
+    CGContextRef ctx = UIGraphicsGetCurrentContext();
+    CGRect area = CGRectMake(0, 0, image.size.width, image.size.height);
+    CGContextScaleCTM(ctx, 1, -1);
+    CGContextTranslateCTM(ctx, 0, -area.size.height);
+    CGContextSetBlendMode(ctx, kCGBlendModeMultiply);
+    CGContextSetAlpha(ctx, alpha);
+    CGContextDrawImage(ctx, area, image.CGImage);
+    UIImage *newImage = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    return newImage;
+    
+}
+
+/**
+ 镶嵌图片
+ @param firstImage 图片1
+ @param secondImage 图片2
+ @return 拼接后的图片
+ */
++ (UIImage *)spliceFirstImage:(UIImage *)firstImage secondImage:(UIImage *)secondImage {
+    
+    CGSize size1 = firstImage.size;
+    
+    UIGraphicsBeginImageContextWithOptions(firstImage.size, NO, [[UIScreen mainScreen] scale]);
+    [firstImage drawInRect:CGRectMake(0, 0, firstImage.size.width, firstImage.size.height)];
+    
+    //    [img2 drawInRect:CGRectMake((size1.width-size2.width)/2.0, (size1.height-size2.height)/2.0, size2.width, size2.height)];
+    [secondImage drawInRect:CGRectMake(size1.width/4.0, size1.height/2.5, size1.width/2, size1.width/2)];
+    UIImage *newPic = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    
+    return newPic;
+}
+
++ (UIImage *)qrCodeImageForDataDic:(NSDictionary *)dataDic size:(CGSize)size waterImage:(UIImage *)waterImage {
+    
+    //创建名为"CIQRCodeGenerator"的CIFilter
+    CIFilter *filter = [CIFilter filterWithName:@"CIQRCodeGenerator"];
+    //将filter所有属性设置为默认值
+    [filter setDefaults];
+    
+    //将所需尽心转为UTF8的数据，并设置给filter
+    NSData *data = [NSJSONSerialization dataWithJSONObject:dataDic options:NSJSONWritingPrettyPrinted error:nil];
+    [filter setValue:data forKey:@"inputMessage"];
+    
+    //设置二维码的纠错水平，越高纠错水平越高，可以污损的范围越大
+    /*
+     * L: 7%
+     * M: 15%
+     * Q: 25%
+     * H: 30%
+     */
+    [filter setValue:@"H" forKey:@"inputCorrectionLevel"];
+    
+    //拿到二维码图片，此时的图片不是很清晰，需要二次加工
+    CIImage *outPutImage = [filter outputImage];
+    
+    //如果有水印图片，那么添加水印后在调整清晰度，
+    //如果没有直接，直接调节清晰度
+    if (!waterImage) {
+        return [[[self alloc] init] getHDImageWithCIImage:outPutImage size:size];
+    } else {
+        
+        return [[[self alloc] init] getHDImageWithCIImage:outPutImage size:size waterImage:waterImage];;
+    }
+}
+
+/**
+ 调整二维码清晰度
+ 
+ @param image 模糊的二维码图片
+ @param size 二维码的宽高
+ @return 清晰的二维码图片
+ */
+- (UIImage *)getHDImageWithCIImage:(CIImage *)image size:(CGSize)size {
+    
+    CGRect extent = CGRectIntegral(image.extent);
+    CGFloat scale = MIN(size.width/CGRectGetWidth(extent), size.height/CGRectGetHeight(extent));
+    
+    // 1.创建bitmap;
+    size_t width = CGRectGetWidth(extent) * scale;
+    size_t height = CGRectGetHeight(extent) * scale;
+    //创建一个DeviceGray颜色空间
+    CGColorSpaceRef cs = CGColorSpaceCreateDeviceGray();
+    //CGBitmapContextCreate(void * _Nullable data, size_t width, size_t height, size_t bitsPerComponent, size_t bytesPerRow, CGColorSpaceRef  _Nullable space, uint32_t bitmapInfo)
+    //width：图片宽度像素
+    //height：图片高度像素
+    //bitsPerComponent：每个颜色的比特值，例如在rgba-32模式下为8
+    //bitmapInfo：指定的位图应该包含一个alpha通道。
+    CGContextRef bitmapRef = CGBitmapContextCreate(nil, width, height, 8, 0, cs, (CGBitmapInfo)kCGImageAlphaNone);
+    CIContext *context = [CIContext contextWithOptions:nil];
+    //创建CoreGraphics image
+    CGImageRef bitmapImage = [context createCGImage:image fromRect:extent];
+    
+    CGContextSetInterpolationQuality(bitmapRef, kCGInterpolationNone);
+    CGContextScaleCTM(bitmapRef, scale, scale);
+    CGContextDrawImage(bitmapRef, extent, bitmapImage);
+    
+    // 2.保存bitmap到图片
+    CGImageRef scaledImage = CGBitmapContextCreateImage(bitmapRef);
+    CGContextRelease(bitmapRef); CGImageRelease(bitmapImage);
+    
+    //原图
+    UIImage *outputImage = [UIImage imageWithCGImage:scaledImage];
+    return outputImage;
+}
+
+/**
+ 调整二维码清晰度，添加水印图片
+ 
+ @param image 模糊的二维码图片
+ @param size 二维码的宽高
+ @param waterImage 水印图片
+ @return 添加水印图片后，清晰的二维码图片
+ */
+- (UIImage *)getHDImageWithCIImage:(CIImage *)image size:(CGSize)size waterImage:(UIImage *)waterImage {
+    
+    CGRect extent = CGRectIntegral(image.extent);
+    CGFloat scale = MIN(size.width/CGRectGetWidth(extent), size.height/CGRectGetHeight(extent));
+    
+    // 1.创建bitmap;
+    size_t width = CGRectGetWidth(extent) * scale;
+    size_t height = CGRectGetHeight(extent) * scale;
+    //创建一个DeviceGray颜色空间
+    CGColorSpaceRef cs = CGColorSpaceCreateDeviceGray();
+    //CGBitmapContextCreate(void * _Nullable data, size_t width, size_t height, size_t bitsPerComponent, size_t bytesPerRow, CGColorSpaceRef  _Nullable space, uint32_t bitmapInfo)
+    //width：图片宽度像素
+    //height：图片高度像素
+    //bitsPerComponent：每个颜色的比特值，例如在rgba-32模式下为8
+    //bitmapInfo：指定的位图应该包含一个alpha通道。
+    CGContextRef bitmapRef = CGBitmapContextCreate(nil, width, height, 8, 0, cs, (CGBitmapInfo)kCGImageAlphaNone);
+    CIContext *context = [CIContext contextWithOptions:nil];
+    //创建CoreGraphics image
+    CGImageRef bitmapImage = [context createCGImage:image fromRect:extent];
+    CGContextSetInterpolationQuality(bitmapRef, kCGInterpolationNone);
+    CGContextScaleCTM(bitmapRef, scale, scale);
+    CGContextDrawImage(bitmapRef, extent, bitmapImage);
+    
+    // 2.保存bitmap到图片
+    CGImageRef scaledImage = CGBitmapContextCreateImage(bitmapRef);
+    CGContextRelease(bitmapRef); CGImageRelease(bitmapImage);
+    
+    //原图
+    UIImage *outputImage = [UIImage imageWithCGImage:scaledImage];
+    //给二维码加 logo 图
+    UIGraphicsBeginImageContextWithOptions(outputImage.size, NO, [[UIScreen mainScreen] scale]);
+    [outputImage drawInRect:CGRectMake(0, 0, size.width, size.height)];
+    //logo图
+    //把logo图画到生成的二维码图片上，注意尺寸不要太大（最大不超过二维码图片的%30），太大会造成扫不出来
+    [waterImage drawInRect:CGRectMake((size.width-waterImage.size.width)/2.0, (size.height-waterImage.size.height)/2.0, waterImage.size.width, waterImage.size.height)];
+    UIImage *newPic = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    
+    return newPic;
+}
+
++ (UIImage *)changeColorWithQRCodeImage:(UIImage *)image red:(NSUInteger)red green:(NSUInteger)green blue:(NSUInteger)blue {
+    
+    const int imageWidth = image.size.width;
+    const int imageHeight = image.size.height;
+    size_t bytesPerRow = imageWidth * 4;
+    uint32_t * rgbImageBuf = (uint32_t *)malloc(bytesPerRow * imageHeight);
+    CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
+    CGContextRef context = CGBitmapContextCreate(rgbImageBuf, imageWidth, imageHeight, 8, bytesPerRow, colorSpace, kCGBitmapByteOrder32Little | kCGImageAlphaNoneSkipLast);
+    
+    CGContextDrawImage(context, (CGRect){(CGPointZero), (image.size)}, image.CGImage);
+    //遍历像素
+    int pixelNumber = imageHeight * imageWidth;
+    [self changeColorOnPixel:rgbImageBuf pixelNum:pixelNumber red:red green:green blue:blue];
+    
+    CGDataProviderRef dataProvider = CGDataProviderCreateWithData(NULL, rgbImageBuf, bytesPerRow, ProviderReleaseData);
+    
+    CGImageRef imageRef = CGImageCreate(imageWidth, imageHeight, 8, 32, bytesPerRow, colorSpace, kCGImageAlphaLast | kCGBitmapByteOrder32Little, dataProvider, NULL, true, kCGRenderingIntentDefault);
+    UIImage * resultImage = [UIImage imageWithCGImage: imageRef];
+    CGImageRelease(imageRef);
+    CGColorSpaceRelease(colorSpace);
+    CGContextRelease(context);
+    return resultImage;
+}
+
+/**
+ 遍历像素点，修改颜色
+ 
+ @param rgbImageBuf rgbImageBuf
+ @param pixelNum pixelNum
+ @param red red
+ @param green green
+ @param blue blue
+ */
++ (void)changeColorOnPixel: (uint32_t *)rgbImageBuf pixelNum: (int)pixelNum red: (NSUInteger)red green: (NSUInteger)green blue: (NSUInteger)blue {
+    
+    uint32_t * pCurPtr = rgbImageBuf;
+    
+    for (int i = 0; i < pixelNum; i++, pCurPtr++) {
+        
+        if ((*pCurPtr & 0xffffff00) < 0xd0d0d000) {
+            
+            uint8_t * ptr = (uint8_t *)pCurPtr;
+            ptr[3] = red;
+            ptr[2] = green;
+            ptr[1] = blue;
+        } else {
+            //将白色变成透明色
+            uint8_t * ptr = (uint8_t *)pCurPtr;
+            ptr[0] = 0;
+        }
+    }
+}
+
+void ProviderReleaseData(void * info, const void * data, size_t size) {
+    
+    free((void *)data);
+}
 
 
 @end

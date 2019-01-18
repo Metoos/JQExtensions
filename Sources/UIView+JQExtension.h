@@ -83,9 +83,31 @@
 @property (nonatomic, assign) CGFloat right;
 @property (nonatomic, assign) CGPoint origin;
 
+
+@property (nonatomic) IBInspectable CGFloat cornerRadius;
+@property (nonatomic) IBInspectable BOOL    masksToBounds;
+@property (nonatomic) IBInspectable CGFloat borderWidth;
+@property (nonatomic) IBInspectable UIColor *borderColor;
+
+
 //找到自己的vc
 - (UIViewController *)jq_viewController;
 
+
+
+
+
+/** 按类名查找子视图  */
+- (UIView*)subViewOfClassName:(NSString*)className;
+
+/*
+ 周边加阴影，并且同时圆角
+ */
+- (void)shadowWithOpacity:(float)shadowOpacity
+             shadowRadius:(CGFloat)shadowRadius
+             shadowOffset:(CGSize)shadowOffset
+              shadowColor:(UIColor*)shadowColor
+          andCornerRadius:(CGFloat)cornerRadius;
 
 /** 使用CAShapeLayer和UIBezierPath设置圆角  */
 - (void) setShapeRoundedCornersSize:(CGFloat)cornersSize;
