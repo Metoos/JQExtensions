@@ -121,9 +121,6 @@
 
 /****************** 系统信息模块 ******************/
 
-/** 获取当前网络类型 */
-+ (NSString *)getNetConnectType;
-
 /** 获取iPhone名称 */
 //返回 ‘某某’的iPhone
 + (NSString *)getiPhoneName;

@@ -45,7 +45,10 @@
     dispatch_once(&onceToken, ^{
         UITextField *textField = [[UITextField alloc] init];
         textField.placeholder = @" ";
-        color = [textField valueForKeyPath:@"_placeholderLabel.textColor"];
+//        color = [textField valueForKeyPath:@"_placeholderLabel.textColor"];
+        Ivar ivar =  class_getInstanceVariable([UITextField class], "_placeholderLabel");
+        UILabel *placeholderLabel = object_getIvar(textField, ivar);
+        color = placeholderLabel.textColor;
     });
     return color;
 }
