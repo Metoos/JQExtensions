@@ -11,8 +11,6 @@
 @interface NSDictionary (JQExtension)
 
 
-
-
 /** 强制固定类型返回值 */
 - (NSString *)toString:(NSString *)aKey;
 

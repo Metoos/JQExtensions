@@ -55,6 +55,7 @@ typedef NS_ENUM(NSUInteger, GradientType) {
  *  返回一张自由拉伸的图片
  */
 + (instancetype)resizedImageWithName:(NSString *)name;
+
 + (instancetype)resizedImageWithName:(NSString *)name left:(CGFloat)left top:(CGFloat)top;
 /**
  *  返回一张自由设置尺寸的图片

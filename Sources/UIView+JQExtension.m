@@ -190,6 +190,28 @@
     return [UIColor colorWithCGColor:self.layer.borderColor];
 }
 
+- (void)setTopCorner:(CGFloat)topCorner
+{
+    CGFloat widht = [UIScreen mainScreen].bounds.size.width/375.0f*self.width;
+    self.width = widht;
+    UIBezierPath *path = [UIBezierPath bezierPathWithRoundedRect:self.bounds byRoundingCorners:UIRectCornerTopLeft | UIRectCornerTopRight cornerRadii:CGSizeMake(topCorner, topCorner)];
+    CAShapeLayer *layer = [[CAShapeLayer alloc] init];
+    layer.frame = self.bounds;
+    layer.path = path.CGPath;
+    self.layer.mask = layer;
+}
+
+
+- (void)setBottomCorner:(CGFloat)bottomCorner
+{
+    CGFloat widht = [UIScreen mainScreen].bounds.size.width/375.0f*self.width;
+    self.width = widht;
+    UIBezierPath *path = [UIBezierPath bezierPathWithRoundedRect:self.bounds byRoundingCorners:UIRectCornerBottomLeft | UIRectCornerBottomRight cornerRadii:CGSizeMake(bottomCorner, bottomCorner)];
+    CAShapeLayer *layer = [[CAShapeLayer alloc] init];
+    layer.frame = self.bounds;
+    layer.path = path.CGPath;
+    self.layer.mask = layer;
+}
 
 - (UIViewController *)jq_viewController{
     for (UIView* next = self; next; next = next.superview) {
@@ -228,14 +250,19 @@
               shadowColor:(UIColor*)shadowColor
           andCornerRadius:(CGFloat)cornerRadius
 {
+    //解决获取不到 xib、storyboard autolayout适配后的真实frame 问题
+    [[self superview] setNeedsLayout];
+    [[self superview] layoutIfNeeded];
     //////// shadow /////////
     CALayer *shadowLayer = [CALayer layer];
     shadowLayer.frame = self.layer.frame;
     
+    NSLog(@"shadowWithOpacity frame = %@",NSStringFromCGRect(self.layer.frame));
+    
     shadowLayer.shadowColor = shadowColor.CGColor;//shadowColor阴影颜色
     shadowLayer.shadowOffset = shadowOffset;//shadowOffset阴影偏移，默认(0, -3),这个跟shadowRadius配合使用
     shadowLayer.shadowOpacity = shadowOpacity;//0.8;//阴影透明度，默认0
-    shadowLayer.shadowRadius = shadowRadius;//8;//阴影半径，默认3
+    shadowLayer.shadowRadius = shadowRadius;//阴影半径，默认3
     //路径阴影
     UIBezierPath *path = [UIBezierPath bezierPath];
     
@@ -274,6 +301,7 @@
 /** 使用CAShapeLayer和UIBezierPath设置圆角  防止直接使用layer设置圆角 触发离屏渲染*/
 - (void)setShapeRoundedCornersSize:(CGFloat)cornersSize
 {
+    
     UIBezierPath *maskPath = [UIBezierPath bezierPathWithRoundedRect:self.bounds
                                                         cornerRadius:cornersSize];
     CAShapeLayer *maskLayer = [[CAShapeLayer alloc] init];

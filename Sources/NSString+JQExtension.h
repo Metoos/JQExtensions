@@ -165,13 +165,13 @@
 + (long long)getAvailableMemorySize;
 
 /** 已使用的内存空间 */
-- (int64_t)getUsedMemory;
++ (int64_t)getUsedMemory;
 
 /** 获取设备mac 地址 */
-- (NSString *)getMacAddress;
++ (NSString *)getMacAddress;
 
 /** 获取设备IP地址 */
-- (NSString *)getDeviceIPAddresses;
++ (NSString *)getDeviceIPAddresses:(BOOL)preferIPv4;
 
 /**=============== CPU ==============*/
 
@@ -179,23 +179,23 @@
 + (NSString *)getCPUType;
 
 /** CPU总数目 */
-- (NSUInteger)getCPUCount;
++ (NSUInteger)getCPUCount;
 
 /** 已使用的CPU比例 */
-- (float)getCPUUsage;
++ (float)getCPUUsage;
 
 /** 获取每个cpu的使用比例 */
-- (NSArray *)getPerCPUUsage;
++ (NSArray *)getPerCPUUsage;
 
 /** ========= Disk磁盘空间 ========== */
 /** 获取磁盘总空间 */
-- (int64_t)getTotalDiskSpace;
++ (int64_t)getTotalDiskSpace;
 
 /** 获取未使用的磁盘空间 */
-- (int64_t)getFreeDiskSpace;
++ (int64_t)getFreeDiskSpace;
 
 /** 获取已使用的磁盘空间 */
-- (int64_t)getUsedDiskSpace;
++ (int64_t)getUsedDiskSpace;
 
 
 @end

@@ -10,71 +10,12 @@
 
 @interface UIView (JQExtension)
 
-//@property (nonatomic) CGFloat jq_left;
-//
-///**
-// * Shortcut for frame.origin.y
-// *
-// * Sets frame.origin.y = top
-// */
-//@property (nonatomic) CGFloat jq_top;
-//
-///**
-// * Shortcut for frame.origin.x + frame.size.width
-// *
-// * Sets frame.origin.x = right - frame.size.width
-// */
-//@property (nonatomic) CGFloat jq_right;
-//
-///**
-// * Shortcut for frame.origin.y + frame.size.height
-// *
-// * Sets frame.origin.y = bottom - frame.size.height
-// */
-//@property (nonatomic) CGFloat jq_bottom;
-//
-///**
-// * Shortcut for frame.size.width
-// *
-// * Sets frame.size.width = width
-// */
-//@property (nonatomic) CGFloat jq_width;
-//
-///**
-// * Shortcut for frame.size.height
-// *
-// * Sets frame.size.height = height
-// */
-//@property (nonatomic) CGFloat jq_height;
-//
-///**
-// * Shortcut for center.x
-// *
-// * Sets center.x = centerX
-// */
-//@property (nonatomic) CGFloat jq_centerX;
-//
-///**
-// * Shortcut for center.y
-// *
-// * Sets center.y = centerY
-// */
-//@property (nonatomic) CGFloat jq_centerY;
-///**
-// * Shortcut for frame.origin
-// */
-//@property (nonatomic) CGPoint jq_origin;
-//
-///**
-// * Shortcut for frame.size
-// */
-//@property (nonatomic) CGSize jq_size;
 
 @property (nonatomic, assign) CGFloat x;
 @property (nonatomic, assign) CGFloat y;
 @property (nonatomic, assign) CGFloat width;
 @property (nonatomic, assign) CGFloat height;
-@property (nonatomic, assign) CGSize size;
+@property (nonatomic, assign) CGSize  size;
 @property (nonatomic, assign) CGFloat centerX;
 @property (nonatomic, assign) CGFloat centerY;
 @property (nonatomic, assign) CGFloat top;
@@ -83,19 +24,20 @@
 @property (nonatomic, assign) CGFloat right;
 @property (nonatomic, assign) CGPoint origin;
 
-
+/**xib或storyboard 快捷设置 layer 属性  */
 @property (nonatomic) IBInspectable CGFloat cornerRadius;
 @property (nonatomic) IBInspectable BOOL    masksToBounds;
 @property (nonatomic) IBInspectable CGFloat borderWidth;
 @property (nonatomic) IBInspectable UIColor *borderColor;
+/**xib或storyboard 快捷设置 view上左上右圆角 与下面属性二者同时设置则无效*/
+@property (nonatomic, assign) IBInspectable CGFloat topCorner;
+/**xib或storyboard 快捷设置 view下左下右圆角  与上面属性二者同时设置则无效*/
+@property (nonatomic, assign) IBInspectable CGFloat bottomCorner;
 
 
-//找到自己的vc
+
+//找到自己当前所在的的viewController
 - (UIViewController *)jq_viewController;
-
-
-
-
 
 /** 按类名查找子视图  */
 - (UIView*)subViewOfClassName:(NSString*)className;

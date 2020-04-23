@@ -20,5 +20,5 @@
 #import "UITextView+JQPlaceHolder.h"
 #import "UIView+JQExtension.h"
 #import "UIView+JQFontSize.h"
-
+#import "NSArray+JQExtensions.h"
 #endif /* JQExtensions_h */

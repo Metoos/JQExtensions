@@ -23,7 +23,7 @@
 + (void)setIgnoreTags:(NSArray<NSNumber*> *)tagArr;
 
 /**
- 设置字体大小比例
+ 设置字体大小比例 （可以根据屏幕大小比例设置字体大小比例）
 
  @param value 需要设置的比例
  */

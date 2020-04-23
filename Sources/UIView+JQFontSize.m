@@ -12,7 +12,7 @@
 #define JQIgnoreTagKey @"JQIgnoreTagKey"
 #define JQFontScaleKey @"JQFontScaleKey"
 
-#define ScrenScale [UIScreen mainScreen].bounds.size.width/320.0
+#define ScrenScale [UIScreen mainScreen].bounds.size.width/375.0
 
 @implementation UIView (JQFontSize)
 /**
