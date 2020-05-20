@@ -16,7 +16,7 @@
 #import "UIButton+JQExtension.h"
 #import "UIImage+JQExtension.h"
 #import "UILabel+JQExtension.h"
-#import "UITableView+JQExtension.h"
+#import "UIScrollView+JQExtension.h"
 #import "UITextView+JQPlaceHolder.h"
 #import "UIView+JQExtension.h"
 #import "UIView+JQFontSize.h"

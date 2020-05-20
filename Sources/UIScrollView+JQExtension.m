@@ -1,25 +1,25 @@
 //
-//  UITableView+JQExtension.m
-//  DuoMiPay
+//  UIScrollView+JQExtension.m
+//  JQExtensionsDemo
 //
-//  Created by mac on 2017/7/19.
-//  Copyright © 2017年 zjq. All rights reserved.
+//  Created by life on 2020/5/20.
+//  Copyright © 2020 mac. All rights reserved.
 //
 
-#import "UITableView+JQExtension.h"
+#import "UIScrollView+JQExtension.h"
 #import <objc/runtime.h>
 
 static char EMPTYVIEWKEY;
 static char TIPSIMAGEVIEWKEY;
 static char TITLELABELKEY;
-@implementation UITableView (JQExtension)
-
+static char TAPREFRESHBLOCK;
+@implementation UIScrollView (JQExtension)
 
 - (UIView *)emptyView
 {
     return objc_getAssociatedObject(self, &EMPTYVIEWKEY);
 }
--(void)setEmptyView:(UIView *)emptyView
+- (void)setEmptyView:(UIView *)emptyView
 {
     if (emptyView != self.emptyView) {
         
@@ -29,6 +29,24 @@ static char TITLELABELKEY;
         [self didChangeValueForKey:@"emptyView"]; // KVO
     }
 }
+
+- (TapTipsViewRefreshBlock)tapRefreshBlock
+{
+    return objc_getAssociatedObject(self, &TAPREFRESHBLOCK);
+}
+
+- (void)setTapRefreshBlock:(TapTipsViewRefreshBlock)tapRefreshBlock
+{
+    if (tapRefreshBlock != self.tapRefreshBlock) {
+        
+        [self willChangeValueForKey:@"tapRefreshBlock"]; // KVO
+        objc_setAssociatedObject(self, &TAPREFRESHBLOCK,
+                                 tapRefreshBlock, OBJC_ASSOCIATION_COPY_NONATOMIC);
+        [self didChangeValueForKey:@"tapRefreshBlock"]; // KVO
+    }
+}
+
+
 - (void)setTipsImgView:(UIImageView *)tipsImgView
 {
     if (tipsImgView != self.tipsImgView) {
@@ -55,7 +73,7 @@ static char TITLELABELKEY;
     }
 }
 
--(UILabel *)titleLabel
+- (UILabel *)titleLabel
 {
     return objc_getAssociatedObject(self, &TITLELABELKEY);
 }
@@ -83,14 +101,14 @@ static char TITLELABELKEY;
         [self dismessEmptyDataTipsView];
         
         self.emptyView = [[UIView alloc]initWithFrame:rect];
-        self.emptyView.backgroundColor = [UIColor whiteColor];
-        [self addSubview:self.emptyView];
+        self.emptyView.backgroundColor = [UIColor clearColor];
+        [[self superview] addSubview:self.emptyView];
         self.scrollEnabled = NO;//关闭tableView滚动功能
         //提示图片
         self.tipsImgView = [[UIImageView alloc]initWithImage:[UIImage imageNamed:imageNamed]];
         self.tipsImgView.frame  = CGRectMake(0, 0, 160, 160);
-        self.tipsImgView.contentMode = UIViewContentModeCenter;
-        self.tipsImgView.center = CGPointMake(self.emptyView.center.x, rect.size.height/2);
+        self.tipsImgView.contentMode = UIViewContentModeScaleAspectFit;
+        self.tipsImgView.center = CGPointMake(self.emptyView.center.x, self.emptyView.center.y );
         
         [self.emptyView addSubview:self.tipsImgView];
         
@@ -105,10 +123,20 @@ static char TITLELABELKEY;
             self.titleLabel.textAlignment = NSTextAlignmentCenter;
             [self.emptyView addSubview:self.titleLabel];
         }
+        UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc]initWithTarget:self action:@selector(tap:)];
+        self.emptyView.userInteractionEnabled = YES;
+        [self.emptyView addGestureRecognizer:tap];
+        
     }else
     {
         [self dismessEmptyDataTipsView];
     }
+}
+
+- (void)tap:(UITapGestureRecognizer *)tap
+{
+    !self.tapRefreshBlock?:self.tapRefreshBlock();
+    
 }
 
 #pragma mark - 移除空数据提示界面
@@ -121,11 +149,9 @@ static char TITLELABELKEY;
     self.tipsImgView = nil;
     [self.emptyView removeFromSuperview];
     self.emptyView = nil;
- 
-    //移除空数据界面后恢复tableView滚动功能
+    //移除空数据界面后恢复scrollView滚动功能
     self.scrollEnabled = YES;
 }
-
 
 
 @end
