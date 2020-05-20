@@ -16,7 +16,7 @@ Pod::Spec.new do |s|
   #
 
   s.name         = "JQExtensions"
-  s.version      = "1.1.1"
+  s.version      = "1.1.3"
   s.summary      = "OC some of the base class extentions."
 
   # This description is used to generate tags and improve search results.
