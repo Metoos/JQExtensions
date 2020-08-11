@@ -23,11 +23,11 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  *返回传入类的某后缀的所有属性
- *@param cls  类
+ *@param cls  实例对象
  *@param hasSuffix  属性后缀
  *@retrun  属性数组
  */
-+ (NSArray *)getProperties:(Class)cls withHasSuffix:(NSString *)hasSuffix;
++ (NSArray *)getProperties:(NSObject *)cls withHasSuffix:(NSString *)hasSuffix;
 
 @end
 

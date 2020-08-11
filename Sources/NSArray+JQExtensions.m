@@ -56,16 +56,17 @@
 
 /**
  *返回传入类的某后缀的所有属性
- *@param cls  类
+ *@param cls  实例对象
  *@param hasSuffix  属性后缀
+ *@retrun  属性数组
  */
-+ (NSArray *)getProperties:(Class)cls withHasSuffix:(NSString *)hasSuffix
++ (NSArray *)getProperties:(NSObject *)cls withHasSuffix:(NSString *)hasSuffix
 {
-    NSArray *properties = [NSArray getProperties:[self class]];
+    NSArray *properties = [NSArray getProperties:cls.class];
     NSMutableArray *ary = [[NSMutableArray alloc]init];
     for (NSString *propertyName in properties) {
         if ([propertyName hasSuffix:hasSuffix]) {
-            id obj = [self valueForKey:propertyName];
+            id obj = [cls valueForKey:propertyName];
             if (obj) {
                 [ary addObject:obj];
             }
